@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CP Streak Tracker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+    @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css');
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d0d0f;
+      --bg2:#141417;
+      --bg3:#1c1c21;
+      --border:#2a2a32;
+      --text:#f0eff4;
+      --muted:#6e6e82;
+      --lc:#f89f1b;
+      --cf:#ffffff;
+      --cc:#1890ff;
+      --hr:#00ea84;
+      --combined:#38bdf8;
+      --at-risk:#f59e0b;
+      --broken:#f43f5e;
+    }
+
+    body{
+      background:var(--bg);
+      font-family:'Syne',sans-serif;
+      color:var(--text);
+      width:320px;
+      margin:0;
+      padding:0;
+      overflow-x:hidden;
+    }
+
+    .header{
+      padding:10px 16px 12px;
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .logo{font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text)}
+    .logo span{color:var(--combined)}
+    .header-actions{display:flex;gap:8px}
+    .icon-btn{
+      width:28px;height:28px;border-radius:8px;
+      background:var(--bg3);border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;font-size:13px;color:var(--muted);
+      transition:all 0.15s;
+    }
+    .icon-btn:hover{background:var(--border);color:var(--text)}
+
+    .combined-strip{
+      margin:12px 16px 0;
+      background:linear-gradient(135deg,#0f172a 0%,#0d0d0f 100%);
+      border:1px solid #1e3a8a;
+      border-radius:12px;
+      padding:12px 14px;
+      display:flex;align-items:center;justify-content:space-between;
+      position:relative;overflow:hidden;
+    }
+    .combined-strip::before{
+      content:'';position:absolute;top:-20px;right:-20px;
+      width:70px;height:70px;border-radius:50%;
+      background:radial-gradient(circle,rgba(56,189,248,0.15) 0%,transparent 70%);
+    }
+    .combined-label{font-size:11px;color:#7dd3fc;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px}
+    .combined-num{font-size:28px;font-weight:800;line-height:1;color:var(--combined);font-family:'JetBrains Mono',monospace}
+    .combined-sub{font-size:11px;color:#5b7094;margin-top:3px}
+    .streak-fire{font-size:24px;opacity:0.9}
+
+    .section-label{
+      font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+      color:var(--muted);padding:12px 16px 8px;
+    }
+
+    .platforms{padding:0 10px;display:flex;flex-direction:column;gap:6px}
+
+    .platform-card{
+      background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+      padding:10px 12px;
+      display:flex;align-items:center;gap:10px;
+      transition:all 0.18s;
+      position:relative;overflow:hidden;
+    }
+    .platform-card::before{
+      content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+      border-radius:3px 0 0 3px;
+    }
+    .platform-card.lc::before{background:var(--lc)}
+    .platform-card.cf::before{background:var(--cf)}
+    .platform-card.cc::before{background:var(--cc)}
+    .platform-card.hr::before{background:var(--hr)}
+    .platform-card:hover{background:var(--bg3);border-color:#3a3a48;transform:translateX(2px)}
+
+    .platform-icon{
+      width:32px;height:32px;border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;
+      flex-shrink:0;
+    }
+    .lc .platform-icon{background:#2d1f00;color:var(--lc)}
+    .cf .platform-icon{background:#1c1c21;color:var(--cf)}
+    .cc .platform-icon{background:#001a33;color:var(--cc)}
+    .hr .platform-icon{background:#003320;color:var(--hr)}
+
+    .platform-info{flex:1;min-width:0}
+    .platform-name{font-size:13px;font-weight:700;margin-bottom:2px}
+    .platform-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+
+    .platform-right{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end}
+    .streak-count{font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1}
+    .lc .streak-count{color:var(--lc)}
+    .cf .streak-count{color:var(--cf)}
+    .cc .streak-count{color:var(--cc)}
+    .hr .streak-count{color:var(--hr)}
+    .streak-label{font-size:10px;color:var(--muted);margin-top:2px}
+
+    .status-pill{
+      display:inline-flex;align-items:center;gap:4px;
+      font-size:10px;font-weight:700;letter-spacing:0.04em;
+      margin-top:4px;
+    }
+    .lc .status-active{color:var(--lc)}
+    .cf .status-active{color:var(--cf)}
+    .cc .status-active{color:var(--cc)}
+    .hr .status-active{color:var(--hr)}
+    .status-risk{color:var(--at-risk)}
+    .status-broken{color:var(--broken)}
+    .status-inactive{color:var(--muted)}
+    .status-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+    .nav-bar{
+      display:flex;border-top:1px solid var(--border);margin-top:16px;
+    }
+    .nav-item{
+      flex:1;padding:11px 0;font-size:11px;font-weight:700;
+      letter-spacing:0.06em;text-transform:uppercase;
+      text-align:center;cursor:pointer;color:var(--muted);
+      transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:3px;
+      background:transparent;border:none;
+    }
+    .nav-item i{font-size:15px}
+    .nav-item.active{color:var(--combined)}
+    .nav-item:hover:not(.active){color:var(--text)}
+
+    .dashboard-view{display:none;padding:12px 16px 0}
+    .dashboard-view.show{display:block}
+    .popup-view.hide{display:none}
+
+    .activity-grid{
+      display:flex;flex-direction:column;gap:10px;
+    }
+    .activity-row{display:flex;align-items:center;gap:8px}
+    .activity-name{font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;width:24px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+    .activity-cells{display:flex;gap:3px;flex:1}
+    .cell{
+      flex:1;height:18px;border-radius:3px;
+      background:var(--bg3);
+      transition:all 0.15s;
+      cursor:default;
+      position:relative;
+    }
+    .cell:hover::after{
+      content:attr(data-tip);
+      position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+      background:#2a2a32;color:var(--text);font-size:9px;padding:3px 6px;border-radius:4px;
+      white-space:nowrap;z-index:10;pointer-events:none;font-family:'JetBrains Mono',monospace;
+    }
+    .cell.lc-active{background:var(--lc);opacity:0.85}
+    .cell.cf-active{background:var(--cf);opacity:0.85}
+    .cell.cc-active{background:var(--cc);opacity:0.85}
+    .cell.hr-active{background:var(--hr);opacity:0.85}
+
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+    .stat-val{font-size:20px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--combined)}
+    .stat-lbl{font-size:10px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-top:2px}
+
+    .popup-view{padding-bottom:4px}
+    .days-label{display:flex;justify-content:space-between;padding:0 0 4px;font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+    /* Input elements styled to match theme */
+    .link-input {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      outline: none;
+    }
+    .link-input:focus {
+      border-color: var(--combined);
+    }
+    .link-btn {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      transition: all 0.15s;
+    }
+    .link-btn:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+    .manage-accounts {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .manage-account-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .manage-account-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .manage-account-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .manage-account-username {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+    }
+    .unlink-btn {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--broken);
+      background: transparent;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      transition: all 0.15s;
+    }
+    .unlink-btn:hover {
+      background: rgba(244, 63, 94, 0.1);
+      border-color: var(--broken);
+    }
+    .unlink-tip {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 8px 10px;
+      background: rgba(56, 189, 248, 0.05);
+      border: 1px dashed rgba(56, 189, 248, 0.2);
+      border-radius: 6px;
+      font-size: 9.5px;
+      line-height: 1.3;
+      color: var(--combined);
+    }
+    .unlink-tip i {
+      font-size: 12px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    
+    /* Skeleton Loader Styles */
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 0.25; }
+    }
+    .skeleton {
+      animation: pulse 1.5s infinite ease-in-out;
+      background: var(--bg3);
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .skeleton-card {
+      pointer-events: none;
+    }
+    .skeleton-card .platform-icon {
+      background: var(--bg3) !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">Streak<span>.</span>dev</div>
+  </div>
+
+  <div class="combined-strip">
+    <div>
+      <div class="combined-label">Combined streak</div>
+      <div class="combined-num" id="combined-streak">0</div>
+      <div class="combined-sub">days across all platforms</div>
+    </div>
+    <div class="streak-fire">🔥</div>
+  </div>
+
+  <!-- Main view wrapper -->
+  <div class="popup-view" id="popupView">
+    <div class="section-label">Platforms</div>
+    <div class="platforms" id="platform-cards">
+      <!-- Dynamic Platform Cards injected here -->
+    </div>
+  </div>
+
+  <!-- Dashboard view wrapper -->
+  <div class="dashboard-view" id="dashView">
+    <div class="section-label" style="padding-top:4px;padding-left:0">Activity — last 21 days</div>
+    <div class="days-label">
+      <span>21d ago</span><span>14d</span><span>7d</span><span>today</span>
+    </div>
+    <div class="activity-grid" id="activityGrid"></div>
+    
+    <div id="streak-expiry-container" class="stat-card" style="margin-top: 12px; display: flex; align-items: center; gap: 12px;">
+      <div id="expiry-icon" style="font-size: 20px;"></div>
+      <div style="flex: 1; min-width: 0;">
+        <div id="expiry-title" style="font-size: 12px; font-weight: 700;"></div>
+        <div id="expiry-time" style="font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px;"></div>
+      </div>
+    </div>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-best">0</div>
+        <div class="stat-lbl">Current streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-solved">0</div>
+        <div class="stat-lbl">Total solved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-longest">0</div>
+        <div class="stat-lbl">Longest Combined</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-consistency">0%</div>
+        <div class="stat-lbl">Consistency</div>
+      </div>
+    </div>
+
+    <div class="section-label" style="padding-top:16px;padding-left:0">Manage Accounts</div>
+    <div class="manage-accounts" id="manageAccounts">
+      <!-- Dynamically filled in popup.js -->
+    </div>
+    <div class="unlink-tip" id="unlinkTip" style="display: none;">
+      <i class="ti ti-info-circle"></i>
+      <span>Tip: If you unlink, you can preserve your streak by linking a new account and solving a problem on it within 24 hours of unlinking.</span>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="nav-bar">
+    <button class="nav-item active" id="navPopup">
+      <i class="ti ti-flame" aria-hidden="true"></i>Streaks
+    </button>
+    <button class="nav-item" id="navDash">
+      <i class="ti ti-chart-bar" aria-hidden="true"></i>Dashboard
+    </button>
+  </nav>
+
+  <script src="../config.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

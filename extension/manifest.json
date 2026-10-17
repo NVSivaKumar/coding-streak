@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "CP Streak Tracker",
+  "version": "1.0.0",
+  "description": "Track your competitive programming streaks across multiple platforms.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "identity",
+    "notifications"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://*.vercel.app/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "48": "assets/icons/icon-48.png",
+      "128": "assets/icons/icon-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background/service_worker.js"
+  },
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  }
+}
